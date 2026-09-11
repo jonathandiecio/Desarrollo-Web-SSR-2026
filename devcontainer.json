@@ -1,0 +1,9 @@
+{
+  "name": "Node.js & Mongo DB",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/mongo:1": {}
+  }
+}
