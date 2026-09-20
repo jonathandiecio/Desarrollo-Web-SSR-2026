@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "DEBUG=Desarrollo-Web-SSR-2026:* node ./bin/www"
-  },
+  "start": "DEBUG=Desarrollo-Web-SSR-2026:* node ./bin/www"
+},
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
