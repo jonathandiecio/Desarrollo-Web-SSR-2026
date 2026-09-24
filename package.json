@@ -2,9 +2,10 @@
   "name": "desarrollo-web-ssr-2026",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-  "start": "DEBUG=Desarrollo-Web-SSR-2026:* node ./bin/www"
-},
+    "start": "DEBUG=Desarrollo-Web-SSR-2026:* node ./server/bin/www"
+  },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
