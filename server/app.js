@@ -1,49 +1,65 @@
-import createError from 'http-errors';
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import cookieParser from 'cookie-parser';
-import logger from 'morgan';
+// Funcion para manejar errores en la aplicacion
+import createError from 'http-errors'
 
-import indexRouter from './routes/index.js';
-import usersRouter from './routes/users.js';
+// Importar el framework express
+import express from 'express'
 
-// Configurar __dirname para módulos ES6
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Importa modulos para manejar rutas
+import path from 'node:path'
 
-// Crea la aplicación Express
-const app = express();
+// Importa modulos para manejar cookies
+import cookieParser from 'cookie-parser'
 
-// Configura el motor de vistas
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+// Importa modulos para manejar logs
+import logger from 'morgan'
 
-// Configuración de middleware
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// Imports para crear __dirname
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
 
-// Configura la carpeta de archivos públicos
-app.use(express.static(path.join(__dirname, 'public')));
+// Crear las variables para __filename y __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
-// Configura las rutas de la aplicación
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Importar las rutas de la aplicacion
+import indexRouter from './routes/index.js'
+import usersRouter from './routes/users.js'
 
-// Captura de errores 404
+// Crear la aplicacion express
+const app = express()
+
+// Configurar el motor de vistas
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'hbs')
+
+// Configurar middlewares de la aplicacion
+app.use(logger('dev'))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(cookieParser())
+
+// Configurar la carpeta de archivos estaticos
+app.use(express.static(path.join(__dirname, '..', 'public')))
+
+// Registramos las rutas de la aplicacion
+app.use('/', indexRouter)
+app.use('/users', usersRouter)
+
+// Capturamos errores 404 y los enviamos al manejador de errores
 app.use(function(req, res, next) {
-  next(createError(404));
-});
+  next(createError(404))
+})
 
 // Manejador de errores
 app.use(function(err, req, res, next) {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  // Set locals, only providing error in development
+  res.locals.message = err.message
+  res.locals.error = req.app.get('env') === 'development' ? err : {}
 
-  res.status(err.status || 500);
-  res.render('error');
-});
+  // Render the error page
+  res.status(err.status || 500)
+  res.render('error')
+})
 
-export default app;
+// Exportar la aplicacion
+export default app
