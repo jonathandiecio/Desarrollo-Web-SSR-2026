@@ -1,0 +1,1 @@
+console.log('🚀 Cliente Vite cargado correctamente');

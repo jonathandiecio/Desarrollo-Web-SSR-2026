@@ -1,65 +1,57 @@
-// Funcion para manejar errores en la aplicacion
-import createError from 'http-errors'
+// Importar módulos principales
+import createError from 'http-errors';
+import express from 'express';
+import path from 'node:path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import createDebug from 'debug';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 
-// Importar el framework express
-import express from 'express'
+// Importar rutas de la aplicación mediante Import Aliases
+import indexRouter from '#router/index.js';
+import usersRouter from '#router/users.js';
 
-// Importa modulos para manejar rutas
-import path from 'node:path'
+// Configurar Debug
+const debug = createDebug('desarrollo-web-ssr-2026:server');
 
-// Importa modulos para manejar cookies
-import cookieParser from 'cookie-parser'
+// Determinar __dirname en ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// Importa modulos para manejar logs
-import logger from 'morgan'
+const app = express();
 
-// Imports para crear __dirname
-import { fileURLToPath } from 'node:url'
-import { dirname } from 'node:path'
+debug('🔨 Creando backend');
 
-// Crear las variables para __filename y __dirname
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+// Motor de plantillas (HBS)
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
-// Importar las rutas de la aplicacion
-import indexRouter from './routes/index.js'
-import usersRouter from './routes/users.js'
+// Middlewares
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
-// Crear la aplicacion express
-const app = express()
+// Archivos estáticos
+debug('🔨 Creando servidor de archivos estáticos');
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Configurar el motor de vistas
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'hbs')
+// Registro de rutas
+debug('🛣️ Registrando rutas');
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 
-// Configurar middlewares de la aplicacion
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
+// Manejo de errores
+app.use((req, res, next) => {
+  next(createError(404));
+});
 
-// Configurar la carpeta de archivos estaticos
-app.use(express.static(path.join(__dirname, '..', 'public')))
+app.use((err, req, res, next) => {
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.status(err.status || 500);
+  res.render('error');
+});
 
-// Registramos las rutas de la aplicacion
-app.use('/', indexRouter)
-app.use('/users', usersRouter)
-
-// Capturamos errores 404 y los enviamos al manejador de errores
-app.use(function(req, res, next) {
-  next(createError(404))
-})
-
-// Manejador de errores
-app.use(function(err, req, res, next) {
-  // Set locals, only providing error in development
-  res.locals.message = err.message
-  res.locals.error = req.app.get('env') === 'development' ? err : {}
-
-  // Render the error page
-  res.status(err.status || 500)
-  res.render('error')
-})
-
-// Exportar la aplicacion
-export default app
+export default app;
