@@ -8,6 +8,10 @@ import createDebug from 'debug';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 
+// Importar HBS y el Helper de Vite
+import hbs from 'hbs';
+import { viteAssetHelper } from './lib/vite.js';
+
 // Importar rutas de la aplicación mediante Import Aliases
 import indexRouter from '#router/index.js';
 import usersRouter from '#router/users.js';
@@ -26,6 +30,9 @@ debug('🔨 Creando backend');
 // Motor de plantillas (HBS)
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
+
+// Registrar Helper de Vite en Handlebars
+hbs.registerHelper('viteAsset', viteAssetHelper);
 
 // Middlewares
 app.use(logger('dev'));
