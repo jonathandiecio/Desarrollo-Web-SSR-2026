@@ -8,9 +8,9 @@ import createDebug from 'debug';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 
-// Importar HBS y el Helper de Vite
+// Importar HBS y la función registradora del Helper de Vite
 import hbs from 'hbs';
-import { viteAssetHelper } from './lib/vite.js';
+import { registerViteHelper } from './lib/vite.js';
 
 // Importar rutas de la aplicación mediante Import Aliases
 import indexRouter from '#router/index.js';
@@ -32,7 +32,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 // Registrar Helper de Vite en Handlebars
-hbs.registerHelper('viteAsset', viteAssetHelper);
+registerViteHelper(hbs);
 
 // Middlewares
 app.use(logger('dev'));
@@ -40,7 +40,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Archivos estáticos
+// Servir estáticos de compilación en producción
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '..', 'dist')));
+}
+
+// Archivos estáticos de desarrollo
 debug('🔨 Creando servidor de archivos estáticos');
 app.use(express.static(path.join(__dirname, '..', 'public')));
 

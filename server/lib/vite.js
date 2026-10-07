@@ -16,7 +16,7 @@ const __dirname = dirname(__filename);
  * EN DESARROLLO: Conecta al servidor de desarrollo de Vite
  * EN PRODUCCIÓN: Usa los compilados de Vite
  */
-export function viteAssetHelper() {
+export function viteAssets() {
   // Obtener modo de ejecución
   const isDev = process.env.NODE_ENV !== 'production';
 
@@ -29,32 +29,48 @@ export function viteAssetHelper() {
     // En desarrollo, cargamos los archivos del front-end directamente del servidor de desarrollo
     return `
       <script type="module" src="${devServer}/@vite/client"></script>
-      <script type="module" src="${devServer}/main.js"></script>
+      <script type="module" src="${devServer}/src/main.js"></script>
     `;
   }
 
-  // En producción leemos el manifest y generamos las etiquetas de script y link
-  const manifestPath = path.join(__dirname, '..', '..', 'public', '.vite', 'manifest.json');
+  // Ruta al manifiesto de Vite
+  const manifestPath = path.join(__dirname, '..', '..', 'dist', '.vite', 'manifest.json');
 
+  // Si no existe el manifest
   if (!fs.existsSync(manifestPath)) {
-    console.warn(
-      'Vite manifest not found. Run "npm run build" to generate it.'
-    );
+    console.warn("Vite manifest not found. Run 'npm run build'");
     return '';
   }
 
+  // Leyendo y parseando a JSON el archivo
+  // de manifiesto que genera vite en la compilacion
+  // de los archivos del front-end
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-  const entry = manifest['main.js'] || manifest['index.html'];
 
-  if (!entry) return '';
+  // Obteniendo la ruta del punto de entrada del front-end
+  const mainEntry = manifest['src/main.js'] || manifest['main.js'];
 
-  let html = `<script type="module" src="/${entry.file}"></script>`;
+  // Guarda el main.js
+  if (!mainEntry) {
+    console.warn('El archivo main.js no esta disponible en el manifiesto de Vite');
+    return '';
+  }
 
-  if (entry.css) {
-    entry.css.forEach((cssFile) => {
-      html += `<link rel="stylesheet" href="/${cssFile}">`;
+  let tags = '';
+
+  if (mainEntry.css) {
+    mainEntry.css.forEach((cssFile) => {
+      tags += `<link rel="stylesheet" href="/${cssFile}">`;
     });
   }
 
-  return html;
+  tags += `<script type="module" src="/${mainEntry.file}"></script>`;
+
+  return tags;
+}
+
+export function registerViteHelper(hbs) {
+  hbs.registerHelper('viteAssets', () => {
+    return new hbs.SafeString(viteAssets());
+  });
 }
